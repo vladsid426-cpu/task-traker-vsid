@@ -39,3 +39,22 @@ class Task(models.Model):
     
     class Meta:
         ordering = ['-status']
+        
+class Comment(models.Model):
+    task = models.ForeignKey(
+        "Task", on_delete=models.CASCADE, related_name="comments"
+    )
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="comments"
+    )
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    likes = models.ManyToManyField(User,related_name='comment_like',blank=True)
+
+    def __str__(self):
+        return f"{self.author.username} — {self.content[:30]}"
+    def get_redirect_url(self,*args,**kwargs):
+        return reverse('tasks:comment_list')
+    
+
+
