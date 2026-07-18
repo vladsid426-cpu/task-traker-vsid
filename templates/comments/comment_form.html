@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Task | Task Tracker</title>
+    <title>Edit Comment | Task Tracker</title>
 
     <style>
 
@@ -62,52 +61,31 @@
         }
 
         h1{
-            text-align:center;
             color:#2563eb;
-            margin-bottom:30px;
+            margin-bottom:20px;
         }
 
-        form p{
-            margin-bottom:18px;
-        }
-
-        input,
-        textarea,
-        select{
+        textarea, input{
             width:100%;
-            padding:12px;
-            margin-top:6px;
+            padding:10px;
             border:1px solid #d1d5db;
             border-radius:8px;
             font-size:16px;
+            margin-bottom:20px;
         }
 
-        textarea{
-            min-height:120px;
-            resize:vertical;
-        }
-
-        input:focus,
-        textarea:focus,
-        select:focus{
-            outline:none;
-            border-color:#2563eb;
-        }
-
-        button{
-            width:100%;
-            padding:14px;
-            border:none;
-            border-radius:8px;
+        .save{
             background:#22c55e;
             color:white;
-            font-size:17px;
+            border:none;
+            padding:12px 20px;
+            border-radius:8px;
+            font-size:16px;
             font-weight:bold;
             cursor:pointer;
-            transition:.25s;
         }
 
-        button:hover{
+        .save:hover{
             background:#16a34a;
         }
 
@@ -120,11 +98,11 @@
 <header>
 
     <div class="logo">
-        📋 Task Tracker
+        💬 Edit Comment
     </div>
 
-    <a class="btn" href="{% url 'tasks:task_list' %}">
-        ← Back
+    <a class="btn" href="{% url 'tasks:comment_list' task.pk %}">
+        ← Back to Comments
     </a>
 
 </header>
@@ -133,18 +111,12 @@
 
     <div class="card">
 
-        <h1>➕ Create Task</h1>
+        <h1>✏ Edit Comment</h1>
 
         <form method="post">
-
             {% csrf_token %}
-
             {{ form.as_p }}
-
-            <button type="submit">
-                Create Task
-            </button>
-
+            <button class="save" type="submit">Save</button>
         </form>
 
     </div>

@@ -6,7 +6,6 @@ from django.views.generic.edit import DeleteView, UpdateView
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView, LogoutView
 
-from .form import RegisterForm, LoginForm
 from .mixins import HiMessageMixin
 
 from django.contrib.auth.forms import UserCreationForm
@@ -14,7 +13,7 @@ from django.contrib.auth import login
 from django.contrib.admin import AdminSite
 
 from .forms import TaskForm, CommentForm
-from .mixins import PermissionDenied, UserIsOwnerMixin,HiMessageMixin
+from .mixins import PermissionDenied, UserIsOwnerMixin, HiMessageMixin
 from .models import Task, Comment
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -23,22 +22,22 @@ from django.shortcuts import get_object_or_404
 
 # Create your views here.
 class RegisterView(CreateView,HiMessageMixin):
-    template_name = "auth/register.html"
-    form_class = RegisterForm
+    template_name = "registration/register.html"
+    form_class = UserCreationForm
     success_url = reverse_lazy("tasks:task_list")
     success_message = "You have successfully registered. Welcome!"
     def form_valid(self, form):
         response = super().form_valid(form)
         login(self.request, self.object)
         return response
-class LogoutView(LogoutView,HiMessageMixin):
-    next_page = reverse_lazy("tasks:task_list")
-    success_message = "You have been logged out."
-class LoginView(LoginView,HiMessageMixin):
-    template_name = "auth/login.html"
-    form_class = LoginForm
-    success_url = reverse_lazy("tasks:task_list")
-    success_message = "You have been logged in."
+# class LogoutView(LogoutView,HiMessageMixin):
+#     next_page = reverse_lazy("tasks:task_list")
+#     success_message = "You have been logged out."
+# class LoginView(LoginView,HiMessageMixin):
+#     template_name = "auth/login.html"
+#     form_class = LoginForm
+#     success_url = reverse_lazy("tasks:task_list")
+#     success_message = "You have been logged in."
 
 class TaskListView(ListView):
     model = Task
@@ -102,7 +101,6 @@ class CommentListView(ListView):
     model = Comment
     template_name = "comments/comment_list.html"
     context_object_name = "com"
-    pk_url_kwarg = 'com_pk'
 
     def get_queryset(self):
         return Comment.objects.filter(task_id=self.kwargs["pk"])
@@ -117,7 +115,10 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
     form_class = CommentForm
     template_name = "comments/comment_create.html"
     context_object_name = "com"
-    success_url = reverse_lazy("tasks:task_list")
+
+    def get_success_url(self):
+        return reverse_lazy("tasks:comment_list", kwargs={"pk": self.kwargs["pk"]})
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["task"] = get_object_or_404(Task, pk=self.kwargs["pk"])
@@ -131,9 +132,12 @@ class CommentUpdateView(LoginRequiredMixin, UserIsOwnerMixin, UpdateView):
     model = Comment
     form_class = CommentForm
     template_name = "comments/comment_form.html"
-    success_url = reverse_lazy("tasks:comment_list")
     owner_field = 'author'
     pk_url_kwarg = 'com_pk'
+
+    def get_success_url(self):
+        return reverse_lazy("tasks:comment_list", kwargs={"pk": self.object.task.pk})
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["task"] = get_object_or_404(Task, pk=self.kwargs["pk"])
@@ -177,7 +181,7 @@ class CommentDeleteView(LoginRequiredMixin,UserIsOwnerMixin, DeleteView):
         context["com"] = get_object_or_404(Comment, pk=self.kwargs["com_pk"])
         return context
 
-def LikeView(request,pk):
-    com = get_object_or_404(Comment,id=request.POST.get('id'))
-    com.likes.add(request.user)
-    return HttpResponseRedirect(reverse('comment_list',args=[str(pk)]))
+# def LikeView(request,pk):
+#     com = get_object_or_404(Comment,id=request.POST.get('id'))
+#     com.likes.add(request.user)
+#     return HttpResponseRedirect(reverse('comment_list',args=[str(pk)]))
