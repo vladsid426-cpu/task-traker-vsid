@@ -11,8 +11,8 @@ class UserIsOwnerMixin(object):
     def dispatch(self, request, *args, **kwargs):
         obj = self.get_object()
         if getattr(obj, self.owner_field) != request.user:
-            redirect("login")
-            raise PermissionDenied
+            error(request, "Ви не є власником цього поста.")
+            return redirect("login")
 
         return super().dispatch(request, *args, **kwargs)
 
